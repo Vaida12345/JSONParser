@@ -33,7 +33,7 @@ extension JSONParser {
     public func decode(_ type: String.Type, forKey key: String, encoding: String.Encoding = .utf8) throws -> String {
         guard let data = self.contents[key] else { throw DecodeError.noSuchKey(key) }
         guard var result = String(data: data, encoding: encoding) else {
-            throw DecodeError.typeMismatch(key: key, data, expected: "String")
+            throw DecodeError.typeMismatch(key: key, payload: data, expected: "String")
         }
         if result.hasPrefix("\"") {
             result.removeFirst()
