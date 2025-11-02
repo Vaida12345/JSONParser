@@ -10,7 +10,7 @@ import Foundation
 
 extension JSONParser {
     
-    private static let null = Data([110, 117, 108, 108])
+    static let null = Data([110, 117, 108, 108])
     
     /// Decodes a value of `Date` for the given key.
     public func decode(_ type: Date?.Type, forKey key: String, strategy: JSONDecoder.DateDecodingStrategy = .deferredToDate) throws -> Date? {

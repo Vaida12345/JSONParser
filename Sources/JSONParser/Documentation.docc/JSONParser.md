@@ -31,6 +31,18 @@ let name = try parser.decode(String.self, forKey: "name")
 let creationDate = try parser.decode(Date.self, forKey: "createdAt", strategy: .iso8601)
 ```
 
+### Decode Optional
+
+There are two ways to produce optional results, using ``decode(_:forKey:)->T`` with Optional type or ``decodeIfPresent(_:forKey:)->T?``.
+
+Use the following table to differentiate.
+
+|                | `decode` with optional | `decodeIfPresent` |
+| -------------- | :--------------------: | :---------------: |
+| decodes `null` | returns `nil`          | returns `nil`     |
+| no such key    | throws                 | returns `nil`     |
+
+
 ## Topics
 
 ### Parsing
