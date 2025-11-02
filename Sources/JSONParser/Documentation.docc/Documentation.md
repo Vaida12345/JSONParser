@@ -13,7 +13,7 @@ Use ``JSONParser`` to quickly split a JSON payload into key–value slices and d
 - term Initialization: ``JSONParser/init(data:)`` expects a top‑level JSON object. It validates the outer braces and builds a fast lookup map from keys to raw value payloads.
 - term Arrays: Use ``JSONParser/parse(_:data:)->[JSONParser]`` to turn a JSON array of objects into an array of ``JSONParser`` instances.
 - term Decoding: Call one of the ``JSONParser/decode(_:forKey:)->T`` methods to decode a value for a specific key using `JSONDecoder`.
-- term Errors: Structural parsing issues throw ``JSONParser/ParseError``. Missing keys or type mismatches during field decoding throw ``JSONParser/DecodeError``. Failures from `JSONDecoder` propagate as `DecodingError`.
+- term Errors: Structural parsing issues throw ``JSONParser/ParseError``. Missing keys or type mismatches during field decoding throw `DecodingError`.
 
 Because values are decoded on demand, you can selectively decode only the fields you need. This can reduce unnecessary work compared to decoding a large model when only a few fields are required.
 

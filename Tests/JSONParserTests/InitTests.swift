@@ -25,7 +25,7 @@ struct JSONParserInitTests {
         #expect(parser.keys.count == 1)
         #expect(parser.keys.first == "a")
         #expect(try parser.decode(Int.self, forKey: "a") == 1)
-        #expect(throws: JSONParser.DecodeError.self) {
+        #expect(throws: DecodingError.self) {
             try parser.decode(Int.self, forKey: "c") == 1
         }
     }
