@@ -10,9 +10,11 @@ struct JSONParserInitTests {
         let string = #"{"a":1}"#
         let parser = try JSONParser(data: string.data(using: .utf8)!)
         
+        #expect(parser["a"] == "1")
         #expect(parser.keys.count == 1)
         #expect(parser.keys.first == "a")
         #expect(try parser.decode(Int.self, forKey: "a") == 1)
+        #expect(try parser.decodeIfPresent(String.self, forKey: "c") == nil)
     }
     
     @Test func string() async throws {

@@ -9,7 +9,7 @@ import Foundation
 
 
 /// A container for JSON dictionary.
-public struct JSONParser {
+public struct JSONParser: Sendable, Equatable, Hashable {
     
     /// The internal decoder used when call ``decode``.
     @usableFromInline
@@ -18,5 +18,14 @@ public struct JSONParser {
     /// Raw contents of the JSON.
     @usableFromInline
     internal let contents: [String : Data]
+    
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(contents)
+    }
+    
+    public static func == (_ lhs: JSONParser, _ rhs: JSONParser) -> Bool {
+        lhs.contents == rhs.contents
+    }
     
 }

@@ -45,8 +45,7 @@ let creationDate = try parser.decode(Date.self, forKey: "createdAt", strategy: .
 
 ### Decoding
 - ``decode(_:forKey:)->T``
-- ``decode(_:forKey:encoding:)``
-- ``decode(_:forKey:strategy:)``
+- ``decode(_:forKey:strategy:)->Date``
 - ``decode(_:forKey:)->JSONParser``
 - ``decode(_:forKey:)->[JSONParser]``
 

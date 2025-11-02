@@ -11,6 +11,7 @@ import Foundation
 extension JSONParser {
     
     /// Decodes a value of the given type for the given key.
+    @_disfavoredOverload
     public func decode<T: Decodable>(_ type: T.Type, forKey key: String) throws -> T {
         guard let data = self.contents[key] else { throw DecodeError.noSuchKey(key) }
         return try self.decoder.decode(T.self, from: data)
@@ -31,21 +32,20 @@ extension JSONParser {
         return parser
     }
     
-    /// Decodes a value of `String` for the given key.
-    public func decode(_ type: String.Type, forKey key: String, encoding: String.Encoding = .utf8) throws -> String {
-        guard let data = self.contents[key] else { throw DecodeError.noSuchKey(key) }
-        guard var result = String(data: data, encoding: encoding) else {
-            throw DecodeError.typeMismatch(key: key, payload: data, expected: "String")
-        }
-        // first and last are "
-        if result.hasPrefix("\"") {
-            result.removeFirst()
-        }
-        if result.hasSuffix("\"") {
-            result.removeLast()
-        }
-        
-        return result
+    
+    /// Returns the content associated with `key`, expressed as `String`.
+    ///
+    /// You can use this method to access the underlying raw string.
+    ///
+    /// ```swift
+    /// let data = #"{"a":1}"#.data(using: .utf8)!
+    ///
+    /// let parser = try JSONParser(data: string)
+    /// parser["a"] // "1"
+    /// ```
+    public subscript(_ key: String) -> String? {
+        guard let data = self.contents[key] else { return nil }
+        return String(data: data, encoding: .utf8)
     }
     
 }
