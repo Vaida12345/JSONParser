@@ -11,10 +11,12 @@ import Foundation
 /// A container for JSON dictionary.
 public struct JSONParser {
     
-    /// The keys for the JSON dictionary.
-    public var keys: Dictionary<String, Data>.Keys { self.contents.keys }
+    /// The internal decoder used when call ``decode``.
+    @usableFromInline
+    internal let decoder = JSONDecoder()
     
     /// Raw contents of the JSON.
-    public let contents: [String : Data]
+    @usableFromInline
+    internal let contents: [String : Data]
     
 }

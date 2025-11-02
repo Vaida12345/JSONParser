@@ -21,7 +21,7 @@ extension JSONParser {
             case .noSuchKey(let string):
                 "No such key: \(string)"
             case .typeMismatch(let key, let data, let expected):
-                "Type mismatch at \(key), expected \(expected), got \(String(decoding: data, as: UTF8.self))."
+                "Type mismatch at \(key), expected \(expected), got \(String(data: data, encoding: .utf8) ?? "<binary data>"))."
             }
         }
         

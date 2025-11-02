@@ -127,3 +127,14 @@ extension JSONParser {
     }
     
 }
+
+
+extension JSONParser {
+    
+    /// Parse a top-level json dictionary.
+    @inlinable
+    public static func parse(_ type: JSONParser.Type, data: Data) throws(ParseError) -> JSONParser {
+        try JSONParser(data: data)
+    }
+    
+}

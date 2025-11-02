@@ -18,7 +18,11 @@ extension JSONParser: CustomStringConvertible, DetailedStringConvertible {
         descriptor.container {
             descriptor.forEach(self.contents) { (key, data) in
                 descriptor.container(key) {
-                    descriptor.constant(String(decoding: data, as: UTF8.self))
+                    if let string = String(data: data, encoding: .utf8) {
+                        descriptor.constant(string)
+                    } else {
+                        descriptor.value("", of: data)
+                    }
                 }
             }
         }
