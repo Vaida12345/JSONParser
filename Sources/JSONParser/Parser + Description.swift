@@ -10,6 +10,7 @@ import DetailedDescription
 
 extension JSONParser: CustomStringConvertible, DetailedStringConvertible {
     
+    @inlinable
     public var description: String {
         self.detailedDescription
     }

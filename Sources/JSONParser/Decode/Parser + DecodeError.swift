@@ -46,6 +46,8 @@ extension JSONParser {
         ///   - expected: A textual description of the expected type (e.g., "Int", "String", "Bool").
         case typeMismatch(key: String, payload: Data, expected: String)
         
+        
+        @inlinable
         public var message: String {
             switch self {
             case .noSuchKey(let string):

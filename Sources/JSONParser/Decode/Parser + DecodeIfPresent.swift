@@ -44,10 +44,10 @@ extension JSONParser {
     /// Decodes a dictionary for the given key.
     ///
     /// - Returns: A decoded value of the requested type, or nil if the Decoder does not have an entry associated with the given key, or if the value is a null value.
-    public func decodeIfPresent(_ type: [JSONParser]?.Type, forKey key: String) throws -> [JSONParser]? {
+    public func decodeIfPresent(_ type: [JSONParser].Type, forKey key: String) throws -> [JSONParser]? {
         guard let data = self.contents[key] else { return nil }
         guard data != JSONParser.null else { return nil }
-        let parsers = try JSONParser.parse([JSONParser].self, data: data)
+        let parsers = try JSONParser.parse(type.self, data: data)
         for parser in parsers {
             parser.keyDecodingStrategy = self.keyDecodingStrategy
         }

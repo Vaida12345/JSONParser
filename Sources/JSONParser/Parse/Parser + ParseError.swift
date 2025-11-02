@@ -26,6 +26,7 @@ extension JSONParser {
             self.index = index
         }
         
+        @inlinable
         public var details: String? {
             "data offset: \(index)"
         }

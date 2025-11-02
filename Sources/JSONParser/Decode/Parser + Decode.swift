@@ -12,12 +12,14 @@ extension JSONParser {
     
     /// Decodes a value of the given type for the given key.
     @_disfavoredOverload
+    @inlinable
     public func decode<T: Decodable>(_ type: T.Type, forKey key: String) throws -> T {
         guard let data = self.contents[key] else { throw DecodeError.noSuchKey(key) }
         return try self.decoder.decode(T.self, from: data)
     }
     
     /// Decodes a value of `Date` for the given key.
+    @inlinable
     public func decode(_ type: Date.Type, forKey key: String, strategy: JSONDecoder.DateDecodingStrategy = .deferredToDate) throws -> Date {
         guard let data = self.contents[key] else { throw DecodeError.noSuchKey(key) }
         decoder.dateDecodingStrategy = strategy
@@ -25,6 +27,7 @@ extension JSONParser {
     }
     
     /// Decodes a dictionary for the given key.
+    @inlinable
     public func decode(_ type: JSONParser.Type, forKey key: String) throws -> JSONParser {
         guard let data = self.contents[key] else { throw DecodeError.noSuchKey(key) }
         let parser = try JSONParser(data: data)
@@ -43,6 +46,7 @@ extension JSONParser {
     /// let parser = try JSONParser(data: string)
     /// parser["a"] // "1"
     /// ```
+    @inlinable
     public subscript(_ key: String) -> String? {
         guard let data = self.contents[key] else { return nil }
         return String(data: data, encoding: .utf8)

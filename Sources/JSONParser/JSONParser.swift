@@ -20,10 +20,12 @@ public struct JSONParser: Sendable, Equatable, Hashable {
     internal let contents: [String : Data]
     
     
+    @inlinable
     public func hash(into hasher: inout Hasher) {
         hasher.combine(contents)
     }
     
+    @inlinable
     public static func == (_ lhs: JSONParser, _ rhs: JSONParser) -> Bool {
         lhs.contents == rhs.contents
     }
