@@ -35,6 +35,7 @@ extension JSONParser {
         guard var result = String(data: data, encoding: encoding) else {
             throw DecodeError.typeMismatch(key: key, payload: data, expected: "String")
         }
+        // first and last are "
         if result.hasPrefix("\"") {
             result.removeFirst()
         }
@@ -42,7 +43,7 @@ extension JSONParser {
             result.removeLast()
         }
         
-        return result // first and last are "
+        return result
     }
     
 }

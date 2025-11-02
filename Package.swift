@@ -9,7 +9,7 @@ let package = Package(
         .library(name: "JSONParser", targets: ["JSONParser"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/Vaida12345/Essentials.git", from: "1.1.2"),
+        .package(url: "https://github.com/Vaida12345/Essentials.git", from: "1.1.9"),
         .package(url: "https://github.com/Vaida12345/DetailedDescription.git", from: "2.0.3"),
     ],
     targets: [
