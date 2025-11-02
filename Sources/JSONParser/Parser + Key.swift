@@ -20,7 +20,7 @@ extension JSONParser {
     @inlinable
     public var keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy {
         get { self.decoder.keyDecodingStrategy }
-        set { self.decoder.keyDecodingStrategy = newValue }
+        nonmutating set { self.decoder.keyDecodingStrategy = newValue }
     }
     
 }
