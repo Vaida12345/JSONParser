@@ -138,3 +138,57 @@ extension JSONParser {
     }
     
 }
+
+
+extension Collection {
+    
+    /// Drops first while the `predicate` satisfies.
+    ///
+    /// > Example:
+    /// > ```swift
+    /// > "   abc".dropFirst(while: \.isWhitespace)
+    /// > // "abc"
+    /// > ```
+    ///
+    /// - Complexity: O(*n*), where *n*: The number of elements dropped.
+    @inlinable
+    func dropFirst(while predicate: (Element) throws -> Bool) rethrows -> SubSequence {
+        var droppedCount = 0
+        
+        for element in self {
+            guard try predicate(element) else { break }
+            droppedCount += 1
+        }
+        
+        return self.dropFirst(droppedCount)
+    }
+    
+    /// Drops last while the `predicate` satisfies.
+    ///
+    /// > Example:
+    /// > ```swift
+    /// > "abc   ".dropLast(while: \.isWhitespace)
+    /// > // "abc"
+    /// > ```
+    ///
+    /// - Complexity: O(*n*), where *n*: The number of elements dropped.
+    @inlinable
+    func dropLast(while predicate: (Element) throws -> Bool) rethrows -> SubSequence {
+        guard !self.isEmpty else { return self[self.startIndex..<self.endIndex] }
+        var index = self.endIndex
+        self.formIndex(&index, offsetBy: -1)
+        
+        var droppedCount = 0
+        let startIndex = self.startIndex
+        
+        while try predicate(self[index]) {
+            droppedCount += 1
+            
+            guard index > startIndex else { break }
+            self.formIndex(&index, offsetBy: -1)
+        }
+        
+        return self.dropLast(droppedCount)
+    }
+    
+}

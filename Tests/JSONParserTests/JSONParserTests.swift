@@ -17,6 +17,58 @@ struct JSONParserInitTests {
         #expect(try parser.decodeIfPresent(String.self, forKey: "c") == nil)
     }
     
+    @Test func error() async throws {
+        let string = #"{"a":1}"#
+        let parser = try JSONParser(data: string.data(using: .utf8)!)
+        
+        #expect(parser["a"] == "1")
+        #expect(parser.keys.count == 1)
+        #expect(parser.keys.first == "a")
+        #expect(try parser.decode(Int.self, forKey: "a") == 1)
+        #expect(throws: JSONParser.DecodeError.self) {
+            try parser.decode(Int.self, forKey: "c") == 1
+        }
+    }
+    
+    @Test func description() async throws {
+        let string = #"{"a":{"e":{"d":1}}}"#
+        let parser = try JSONParser(data: string.data(using: .utf8)!)
+        
+        let expected = """
+        {
+          a: {
+            e: {
+              d: 1
+            }
+          }
+        }
+        """
+        
+        #expect(parser.description == expected)
+    }
+    
+    @Test func description2() async throws {
+        let string = "{\"a\":[{\"e\":\"d\ne\"}, {\"e\":\"d\ne\"}]}"
+        let parser = try JSONParser(data: string.data(using: .utf8)!)
+        
+        let expected = """
+        {
+          a: [
+            {
+              e: "d
+                  e"
+            },
+            {
+              e: "d
+                  e"
+            }
+          ]
+        }
+        """
+        
+        #expect(parser.description == expected)
+    }
+    
     @Test func string() async throws {
         let string = #"{"a":"b"}"#
         let parser = try JSONParser(data: string.data(using: .utf8)!)
@@ -121,8 +173,8 @@ struct JSONParserInitTests {
         
         let data = try JSONSerialization.data(withJSONObject: dict)
         let parser = try JSONParser(data: data)
-
-        #expect(try parser.decode(String.self, forKey: "text") == #"Line 1\nLine 2\tTabbed \"quote\" and backslash \\"#)
+        
+        #expect(try parser.decode(String.self, forKey: "text") == "Line 1\nLine 2\tTabbed \"quote\" and backslash \\")
         #expect(try parser.decode(String.self, forKey: "emoji") == "😀")
     }
 

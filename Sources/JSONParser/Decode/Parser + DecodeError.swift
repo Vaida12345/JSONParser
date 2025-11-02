@@ -5,7 +5,6 @@
 //  Created by Vaida on 2025-11-02.
 //
 
-import Essentials
 import Foundation
 
 
@@ -32,7 +31,7 @@ extension JSONParser {
     ///     print(error.message)
     /// }
     /// ```
-    public enum DecodeError: GenericError {
+    public enum DecodeError: Error, CustomStringConvertible {
         /// Key not found in the current JSON object.
         ///
         /// - Parameter key: The missing key.
@@ -48,12 +47,12 @@ extension JSONParser {
         
         
         @inlinable
-        public var message: String {
+        public var description: String {
             switch self {
             case .noSuchKey(let string):
-                "No such key: \(string)"
+                "No such key: \"\(string)\""
             case .typeMismatch(let key, let data, let expected):
-                "Type mismatch at \(key), expected \(expected), got \(String(data: data, encoding: .utf8) ?? "<binary data>"))."
+                "Type mismatch at \"\(key)\", expected \(expected), got \(String(data: data, encoding: .utf8) ?? "<binary data>"))."
             }
         }
         

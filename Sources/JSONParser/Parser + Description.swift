@@ -5,28 +5,50 @@
 //  Created by Vaida on 2025-11-02.
 //
 
-import DetailedDescription
 
-
-extension JSONParser: CustomStringConvertible, DetailedStringConvertible {
+extension JSONParser: CustomStringConvertible {
     
-    @inlinable
     public var description: String {
-        self.detailedDescription
-    }
-    
-    public func detailedDescription(using descriptor: DetailedDescription.Descriptor<JSONParser>) -> any DescriptionBlockProtocol {
-        descriptor.container {
-            descriptor.forEach(self.contents) { (key, data) in
-                descriptor.container(key) {
-                    if let string = String(data: data, encoding: .utf8) {
-                        descriptor.constant(string)
-                    } else {
-                        descriptor.value("", of: data)
+        guard !self.isEmpty else { return "{}" }
+        
+        var description = "{\n"
+        for (key, value) in self.contents {
+            let title = "  \(key): "
+            description += title
+            if let parser = try? self.decode(JSONParser.self, forKey: key) {
+                var components = parser.description.components(separatedBy: "\n")
+                let firstComponent = components.removeFirst()
+                description += firstComponent
+                for component in components {
+                    description += "\n" + String(repeating: " ", count: 2) + component
+                }
+            } else if let parsers = try? self.decode([JSONParser].self, forKey: key) {
+                description += "[\n  "
+                let additions = parsers.map { parser in
+                    var description = ""
+                    var components = parser.description.components(separatedBy: "\n")
+                    let firstComponent = components.removeFirst()
+                    description += String(repeating: " ", count: 2) + firstComponent
+                    for component in components {
+                        description += "\n  " + String(repeating: " ", count: 2) + component
                     }
+                    return description
+                }
+                
+                description += additions.joined(separator: ",\n  ")
+                description += "\n  ]"
+            } else {
+                let _description = String(data: value, encoding: .utf8) ?? "<binary>"
+                var components = _description.components(separatedBy: "\n")
+                let firstComponent = components.removeFirst()
+                description += firstComponent
+                for component in components {
+                    description += "\n" + String(repeating: " ", count: title.count + 1) + component
                 }
             }
+            description += "\n"
         }
+        return description + "}"
     }
     
 }
