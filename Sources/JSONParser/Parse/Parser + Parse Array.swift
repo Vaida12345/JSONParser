@@ -11,14 +11,28 @@ import Foundation
 extension JSONParser {
     
     /// Parse an array of top-level json dictionaries.
-    public static func parse(_ type: [JSONParser].Type, data: Data) throws(ParseError) -> [JSONParser] {
-        var index = data.startIndex
+    public static func parse(_: [JSONParser].Type, data: Data) throws(ParseError) -> [JSONParser] {
+        let original = data
+        let data = data.dropFirst(while: isJSONWhitespace)
+            .dropLast(while: isJSONWhitespace)
+        guard !data.isEmpty else { throw ParseError(message: "Input data is empty", index: original.startIndex, data: original) }
+        guard data.first == 91 else { throw ParseError(message: "Missing start bracket '['", index: data.startIndex, data: original) }
+        guard data.last == 93 else { throw ParseError(message: "Missing end bracket ']'", index: data.endIndex &- 1, data: original) }
         
-        var elementStartIndex: Int? = nil
+        // Empty array
+        if data.count == 2 { return [] }
+        
+        var index = data.startIndex + 1 // skip past '['
+        
+        // Skip whitespace to find first element (or closing bracket)
+        while index < data.endIndex, isJSONWhitespace(data[index]) { index &+= 1 }
+        if index == data.endIndex - 1 { return [] } // only ']' remains
+        
+        var elementStartIndex = index
         var escape = false
         var quotation = false
         var curlyBraceDepth: Int = 0
-        var squareBracketDepth = 0
+        var squareBracketDepth = 1 // already inside the outer array
         var contents: [JSONParser] = []
         
         while index < data.endIndex - 1 {
@@ -26,7 +40,7 @@ extension JSONParser {
             
             if escape && quotation {
                 escape = false
-                continue // consume nevertheless
+                continue
             } else if quotation && data[index] == 92 { // escape
                 escape = true
                 continue
@@ -36,23 +50,20 @@ extension JSONParser {
             case 34: // "
                 quotation.toggle()
                 
-            case 44: //,
+            case 44: // ,
                 guard !quotation, curlyBraceDepth == 0, squareBracketDepth == 1 else { continue }
-                if let _elementStartIndex = elementStartIndex {
-                    try contents.append(JSONParser(data: data[_elementStartIndex..<index]))
-                    elementStartIndex = index + 1
-                }
+                try contents.append(JSONParser(data: data[elementStartIndex..<index]))
+                // Skip whitespace to find next element
+                elementStartIndex = index &+ 1
+                while elementStartIndex < data.endIndex, isJSONWhitespace(data[elementStartIndex]) { elementStartIndex &+= 1 }
                 
             case 91 where !quotation: // [
-                if squareBracketDepth == 0 {
-                    elementStartIndex = index + 1
-                }
                 squareBracketDepth &+= 1
                 
             case 93 where !quotation: // ]
                 squareBracketDepth &-= 1
                 if squareBracketDepth < 0 {
-                    throw ParseError(message: "Misplaced ']' or missing '['", index: index, data: data)
+                    throw ParseError(message: "Misplaced ']' or missing '['", index: index, data: original)
                 }
                 
             case 123 where !quotation: // {
@@ -61,7 +72,7 @@ extension JSONParser {
             case 125 where !quotation: // }
                 curlyBraceDepth &-= 1
                 if curlyBraceDepth < 0 {
-                    throw ParseError(message: "Misplaced '}' or missing '{'", index: index, data: data)
+                    throw ParseError(message: "Misplaced '}' or missing '{'", index: index, data: original)
                 }
                 
             default:
@@ -69,10 +80,10 @@ extension JSONParser {
             }
         }
         
-        if let elementStartIndex {
-            try contents.append(JSONParser(data: data[elementStartIndex..<index]))
-        } else {
-            throw ParseError(message: "Invalid or incomplete JSON array", index: index, data: data)
+        // Append the final element (its data ends before ']')
+        let lastEnd = data.endIndex - 1
+        if elementStartIndex < lastEnd {
+            try contents.append(JSONParser(data: data[elementStartIndex..<lastEnd]))
         }
         
         return contents

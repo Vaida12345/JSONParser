@@ -13,7 +13,7 @@ extension JSONParser {
     static let null = Data([110, 117, 108, 108])
     
     func decodeData<T>(_ type: T.Type, forKey key: String, closure: (Data) throws -> T) throws(DecodingError) -> T {
-        guard let data = self.contents[key] else {
+        guard let raw = self.contents[key] else {
             throw DecodingError.keyNotFound(
                 AnyCodingKey(stringValue: key),
                 DecodingError.Context(
@@ -22,7 +22,8 @@ extension JSONParser {
                 )
             )
         }
-        
+
+        let data = raw.dropFirst(while: isJSONWhitespace).dropLast(while: isJSONWhitespace)
         guard data != JSONParser.null else {
             throw DecodingError.valueNotFound(
                 Data.self,
@@ -85,6 +86,22 @@ extension JSONParser {
         }
     }
     
+    /// Decodes a value of the given type for the given key.
+    ///
+    /// - parameters:
+    ///   - type: The type of value to decode.
+    ///   - key: The key that the decoded value is associated with.
+    ///
+    /// - throws: `DecodingError.keyNotFound` if `self` does not have an entry for the given key.
+    /// - throws: `DecodingError.typeMismatch` if the encountered encoded value is not convertible to the requested type.
+    /// - throws: `DecodingError.valueNotFound` if the encountered encoded value is null, or of there are no more values to decode.
+    @available(macOS 14, iOS 17, tvOS 17, visionOS 1, watchOS 10, *)
+    public func decode<T: DecodableWithConfiguration>(_ type: T.Type, forKey key: String, configuration: T.DecodingConfiguration) throws(DecodingError) -> T {
+        try self.decodeData(type, forKey: key) {
+            return try self.decoder.decode(T.self, from: $0, configuration: configuration)
+        }
+    }
+    
     /// Decodes a value of the `Date` for the given key.
     ///
     /// - parameters:
@@ -102,6 +119,23 @@ extension JSONParser {
         }
     }
     
+    /// Decodes a value of the `FloatingPoint` for the given key.
+    ///
+    /// - parameters:
+    ///   - type: The type of value to decode.
+    ///   - key: The key that the decoded value is associated with.
+    ///   - strategy: The strategy for decoding an exceptional floating-point value.
+    ///
+    /// - throws: `DecodingError.keyNotFound` if `self` does not have an entry for the given key.
+    /// - throws: `DecodingError.typeMismatch` if the encountered encoded value is not convertible to the requested type.
+    /// - throws: `DecodingError.valueNotFound` if the encountered encoded value is null, or of there are no more values to decode.
+    public func decode<T>(_ type: T.Type, forKey key: String, strategy: JSONDecoder.NonConformingFloatDecodingStrategy = .throw) throws(DecodingError) -> T where T: FloatingPoint & Decodable {
+        try self.decodeData(T.self, forKey: key) {
+            decoder.nonConformingFloatDecodingStrategy = strategy
+            return try self.decoder.decode(T.self, from: $0)
+        }
+    }
+    
     /// Decodes a dictionary for the given key.
     ///
     /// - parameters:
@@ -114,7 +148,7 @@ extension JSONParser {
     public func decode(_ type: JSONParser.Type, forKey key: String) throws(DecodingError) -> JSONParser {
         try self.decodeData(JSONParser.self, forKey: key) {
             let parser = try JSONParser(data: $0)
-            parser.keyDecodingStrategy = keyDecodingStrategy
+            parser.decoder.keyDecodingStrategy = self.decoder.keyDecodingStrategy
             return parser
         }
     }

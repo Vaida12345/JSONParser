@@ -105,7 +105,7 @@ extension JSONParser {
             return parser
         }
     }
-    
+
     /// Decodes an array of dictionaries for the given key.
     ///
     /// This method returns `nil` if the container does not have a value associated with key, or if the value is null. The difference between these states can be distinguished using ``keys``.

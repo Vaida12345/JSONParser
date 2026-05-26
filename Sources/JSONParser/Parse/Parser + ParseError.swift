@@ -19,10 +19,14 @@ extension JSONParser {
         /// The zero-based byte index into the provided data where the error was detected.
         public let index: Int
         
+        /// The failed payload.
+        public let data: Data
+        
         /// Create a decode error with rich location context derived from the original data.
         public init(message: String, index: Int, data: Data) {
             self.description = message
             self.index = index
+            self.data = data
         }
     }
 }
