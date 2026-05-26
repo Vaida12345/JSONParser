@@ -68,6 +68,24 @@ extension JSONParser {
         }
     }
     
+    /// Decodes a value of the given type for the given key.
+    ///
+    /// This method returns `nil` if the container does not have a value associated with key, or if the value is null. The difference between these states can be distinguished using ``keys``.
+    ///
+    /// - parameters:
+    ///   - type: The type of value to decode.
+    ///   - key: The key that the decoded value is associated with.
+    ///
+    /// - throws: `DecodingError.typeMismatch` if the encountered encoded value is not convertible to the requested type.
+    ///
+    /// - Returns: A decoded value of the requested type, or nil if the Decoder does not have an entry associated with the given key, or if the value is a null value.
+    @available(macOS 14, iOS 17, tvOS 17, visionOS 1, watchOS 10, *)
+    public func decodeIfPresent<T: DecodableWithConfiguration>(_ type: T.Type, forKey key: String, configuration: T.DecodingConfiguration) throws(DecodingError) -> T? {
+        try self.decodeDataIfPresent(type, forKey: key) {
+            return try self.decoder.decode(T.self, from: $0, configuration: configuration)
+        }
+    }
+
     /// Decodes a value of `Date` for the given key.
     ///
     /// This method returns `nil` if the container does not have a value associated with key, or if the value is null. The difference between these states can be distinguished using ``keys``.
@@ -87,6 +105,25 @@ extension JSONParser {
         }
     }
     
+    /// Decodes a value of the `FloatingPoint` for the given key.
+    ///
+    /// This method returns `nil` if the container does not have a value associated with key, or if the value is null. The difference between these states can be distinguished using ``keys``.
+    ///
+    /// - parameters:
+    ///   - type: The type of value to decode.
+    ///   - key: The key that the decoded value is associated with.
+    ///   - strategy: The strategy for decoding an exceptional floating-point value.
+    ///
+    /// - throws: `DecodingError.typeMismatch` if the encountered encoded value is not convertible to the requested type.
+    ///
+    /// - Returns: A decoded value of the requested type, or nil if the Decoder does not have an entry associated with the given key, or if the value is a null value.
+    public func decodeIfPresent<T>(_ type: T.Type, forKey key: String, strategy: JSONDecoder.NonConformingFloatDecodingStrategy = .throw) throws(DecodingError) -> T? where T: FloatingPoint & Decodable {
+        try self.decodeDataIfPresent(T.self, forKey: key) {
+            decoder.nonConformingFloatDecodingStrategy = strategy
+            return try self.decoder.decode(T.self, from: $0)
+        }
+    }
+
     /// Decodes a dictionary for the given key.
     ///
     /// This method returns `nil` if the container does not have a value associated with key, or if the value is null. The difference between these states can be distinguished using ``keys``.
