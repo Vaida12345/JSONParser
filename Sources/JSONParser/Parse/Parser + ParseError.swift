@@ -24,7 +24,17 @@ extension JSONParser {
         
         /// Create a decode error with rich location context derived from the original data.
         public init(message: String, index: Int, data: Data) {
-            self.description = message
+            var description = message
+            description += " at byte \(index)"
+            if index < data.endIndex {
+                let start = max(data.startIndex, index)
+                let end = min(data.endIndex, index + 50)
+                let snippet = data[start..<end]
+                if let preview = String(data: snippet, encoding: .utf8), !preview.isEmpty {
+                    description += " near: \"\(preview)\""
+                }
+            }
+            self.description = description
             self.index = index
             self.data = data
         }

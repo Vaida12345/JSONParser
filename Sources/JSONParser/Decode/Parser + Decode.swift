@@ -17,7 +17,7 @@ extension JSONParser {
             throw DecodingError.keyNotFound(
                 AnyCodingKey(stringValue: key),
                 DecodingError.Context(
-                    codingPath: [],
+                    codingPath: [AnyCodingKey(stringValue: key)],
                     debugDescription: "No value associated with key \"\(key)\""
                 )
             )
@@ -26,43 +26,69 @@ extension JSONParser {
         let data = raw.dropFirst(while: isJSONWhitespace).dropLast(while: isJSONWhitespace)
         guard data != JSONParser.null else {
             throw DecodingError.valueNotFound(
-                Data.self,
+                T.self,
                 DecodingError.Context(
-                    codingPath: [],
+                    codingPath: [AnyCodingKey(stringValue: key)],
                     debugDescription: "Cannot get value of type \(type), found null value instead"
                 )
             )
         }
-        
+
         do {
             return try closure(data)
         } catch let error as DecodingError {
+            let rawPreview = String(data: data.prefix(100), encoding: .utf8) ?? "<\(data.count) bytes>"
             switch error {
             case .typeMismatch(let any, let context):
                 throw DecodingError.typeMismatch(
                     any,
                     DecodingError.Context(
-                        codingPath: [AnyCodingKey(stringValue: key)],
+                        codingPath: [AnyCodingKey(stringValue: key)] + context.codingPath,
+                        debugDescription: "\(context.debugDescription) (raw: \(rawPreview))",
+                        underlyingError: context.underlyingError
+                    )
+                )
+            case .valueNotFound(let any, let context):
+                throw DecodingError.valueNotFound(
+                    any,
+                    DecodingError.Context(
+                        codingPath: [AnyCodingKey(stringValue: key)] + context.codingPath,
+                        debugDescription: "\(context.debugDescription) (raw: \(rawPreview))",
+                        underlyingError: context.underlyingError
+                    )
+                )
+            case .keyNotFound(let codingKey, let context):
+                throw DecodingError.keyNotFound(
+                    codingKey,
+                    DecodingError.Context(
+                        codingPath: [AnyCodingKey(stringValue: key)] + context.codingPath,
                         debugDescription: context.debugDescription,
                         underlyingError: context.underlyingError
                     )
                 )
-            default:
-                throw DecodingError.typeMismatch(
-                    T.self,
+            case .dataCorrupted(let context):
+                throw DecodingError.dataCorrupted(
+                    DecodingError.Context(
+                        codingPath: [AnyCodingKey(stringValue: key)] + context.codingPath,
+                        debugDescription: "\(context.debugDescription) (raw: \(rawPreview))",
+                        underlyingError: context.underlyingError
+                    )
+                )
+            @unknown default:
+                throw DecodingError.dataCorrupted(
                     DecodingError.Context(
                         codingPath: [AnyCodingKey(stringValue: key)],
-                        debugDescription: "Cannot get value of type \(type), type mismatch",
+                        debugDescription: "Unknown decoding error for key \"\(key)\"",
                         underlyingError: error
                     )
                 )
             }
         } catch {
-            throw DecodingError.typeMismatch(
-                T.self,
+            let rawPreview = String(data: data.prefix(100), encoding: .utf8) ?? "<\(data.count) bytes>"
+            throw DecodingError.dataCorrupted(
                 DecodingError.Context(
                     codingPath: [AnyCodingKey(stringValue: key)],
-                    debugDescription: "Cannot get value of type \(type), type mismatch",
+                    debugDescription: "Cannot decode value of type \(type) from: \(rawPreview)",
                     underlyingError: error
                 )
             )

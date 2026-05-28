@@ -25,7 +25,7 @@ struct ErrorTests {
             case let .typeMismatch(type, context):
                 return type is String.Type
                 && context.codingPath.map(\.stringValue) == ["a"]
-                && context.debugDescription == "Expected to decode String but found number instead."
+                && context.debugDescription == "Expected to decode String but found number instead. (raw: 1)"
                 && context.underlyingError == nil
             default:
                 return false
@@ -44,7 +44,7 @@ struct ErrorTests {
             switch error {
             case let .keyNotFound(key, context):
                 return key.stringValue == "c"
-                && context.codingPath.map(\.stringValue) == []
+                && context.codingPath.map(\.stringValue) == ["c"]
                 && context.debugDescription == "No value associated with key \"c\""
                 && context.underlyingError == nil
             default:
@@ -63,7 +63,7 @@ struct ErrorTests {
             guard let error = error as? DecodingError else { return false }
             switch error {
             case let .valueNotFound(_, context):
-                return context.codingPath.map(\.stringValue) == []
+                return context.codingPath.map(\.stringValue) == ["a"]
                 && context.debugDescription == "Cannot get value of type String, found null value instead"
                 && context.underlyingError == nil
             default:
